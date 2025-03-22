@@ -64,9 +64,9 @@ export async function GET(req: Request) {
         ? sql`CAST(${violations.time} AS time) >= '06:00:00' AND CAST(${violations.time} AS time) < '18:00:00'`
         : shift === 'Night Shift'
             ? sql`CAST(${violations.time} AS time) >= '18:00:00' OR CAST(${violations.time} AS time) < '06:00:00'`
-            : sql`1=1`; 
+            : sql`1=1`;
 
-    query.where(and(...filters, timeFilter)); 
+    query.where(and(...filters, timeFilter));
     query.orderBy(desc(violations.id))
     query.limit(limit).offset(offset)
     try {
@@ -76,7 +76,7 @@ export async function GET(req: Request) {
             .select({ count: count() })
             .from(violations);
 
-        totalCountQuery.where(filters.length > 0 ? and(...filters) : sql`1=1`)
+        totalCountQuery.where(filters.length > 0 ? and(and(...filters, timeFilter)) : sql`1=1`)
 
         // Execute the count query to get the total count of matching records
         const totalRecords = await totalCountQuery.then(res => res[0].count);
