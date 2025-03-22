@@ -59,10 +59,11 @@ export async function GET(req: Request) {
     }
     filters.push(eq(violations.status, true))
 
+    // Extract time from datetime for filtering
     const timeFilter = shift === 'Day Shift'
-        ? and(gte(violations.time, '06:00:00'), lt(violations.time, '18:00:00'))
+        ? sql`CAST(${violations.time} AS time) >= '06:00:00' AND CAST(${violations.time} AS time) < '18:00:00'`
         : shift === 'Night Shift'
-            ? or(gte(violations.time, '18:00:00'), lt(violations.time, '06:00:00'))
+            ? sql`CAST(${violations.time} AS time) >= '18:00:00' OR CAST(${violations.time} AS time) < '06:00:00'`
             : sql`1=1`; 
 
     query.where(and(...filters, timeFilter)); 
