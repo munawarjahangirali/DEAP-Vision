@@ -41,27 +41,12 @@ Docker Setup:
 
 ```bash
 # Build Docker Image
-docker build -t deapvision .
+docker build -t mma72/deapvision:latest .
+
+# Push Docker Image
+docker push mma72/deapvision:latest
 
 # Run Docker Image
-docker run -p 3000:3000 deapvision
+docker run -d -p 3000:3000 --name deapvision mma72/deapvision:latest
 ```
 
-docker build -t mma72/deapvision:latest .
-docker push mma72/deapvision:latest
-docker run -d -p 3000:3000 --name deapvision mma72/deapvision:latest
-
-
-docker build -t muhammadtalhasultan/deapvision-ui:latest .
-docker push muhammadtalhasultan/deapvision-ui:latest
-
-docker run -d -p 3000:3000 muhammadtalhasultan/deapvision-ui:latest
-
-
-docker pull mma72/deapvision:latest
-
-docker-compose -f docker-compose.yml up -d
-
-docker-compose -f docker-compose.yml up -d --build
-
-ALTER TYPE severityenum ADD VALUE 'HAZARDOUS';
