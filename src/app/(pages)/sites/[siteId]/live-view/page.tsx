@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useCommon, Site } from "@/context/CommonContext";
 
 export default function LiveViewPage({ params }: { params: any }) {
-  const siteId = Number(params.siteId);
+  const unwrappedParams = use(params) as { siteId: string };
+  const siteId = Number(unwrappedParams.siteId);
   const { sites } = useCommon();
   
   const site = sites?.find((site: Site) => +site.id === siteId);

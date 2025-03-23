@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { use } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,7 +33,8 @@ ChartJS.register(
 
 const OverviewPage = ({ params }: { params: any }) => {
 
-  const siteId = Number(params.siteId);
+  const unwrappedParams = use(params) as { siteId: string };
+  const siteId = Number(unwrappedParams.siteId);
   const { sites } = useCommon();
 
   const site = sites?.find((site: Site) => +site.id === siteId);

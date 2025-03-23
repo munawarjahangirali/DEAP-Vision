@@ -41,9 +41,34 @@ interface DashboardData {
     disableDelete?: number;
 }
 
-const fetchMasterData = async (page: number, limit: number, search: string, boardId?: string) => {
-    const params: any = { page, limit, search };
+const fetchMasterData = async (page: number, limit: number, search: string, filters: any, boardId?: string) => {
+    const params: any = { 
+        page, 
+        limit, 
+        search,
+        start_date: filters.startDate || undefined,
+        end_date: filters.endDate || undefined,
+        shift: filters.shift || undefined,
+    };
+    
     if (boardId) params.board_id = boardId;
+    
+    // Add array parameters correctly - using URLSearchParams format
+    if (filters.sites && filters.sites.length > 0) {
+        params.sites = filters.sites;
+    }
+    
+    if (filters.zones && filters.zones.length > 0) {
+        params.zones = filters.zones;
+    }
+    
+    if (filters.types && filters.types.length > 0) {
+        params.violation_type = filters.types;
+    }
+    
+    if (filters.activities && filters.activities.length > 0) {
+        params.activities = filters.activities;
+    }
 
     const { data } = await axiosInstance.get(`/master-data`, { params });
     return data;
@@ -52,10 +77,19 @@ const fetchMasterData = async (page: number, limit: number, search: string, boar
 interface props {
     title?: string;
     boardId?: string;
+    filters?: {
+        sites: string[];
+        zones: string[];
+        types: string[];
+        activities: string[];
+        startDate: string;
+        endDate: string;
+        shift: string;
+    };
 }
 
 const DashboardTable = (
-    { title, boardId }: props
+    { title, boardId, filters = { sites: [], zones: [], types: [], activities: [], startDate: '', endDate: '', shift: '' } }: props
 ) => {
     const { categories, types, sites, zones, isLoading: commonLoading } = useCommon();
     const [selectedData, setSelectedData] = useState<DashboardData | null>(null);
@@ -65,8 +99,8 @@ const DashboardTable = (
     const [search, setSearch] = useState('');
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ['masterData', page, limit, search, boardId],
-        queryFn: () => fetchMasterData(page, limit, search, boardId)
+        queryKey: ['masterData', page, limit, search, filters, boardId],
+        queryFn: () => fetchMasterData(page, limit, search, filters, boardId)
     });
 
     const handleUserClick = (user: DashboardData) => {
@@ -139,42 +173,15 @@ const DashboardTable = (
                 <ImageRenderer src={`${NEXT_PUBLIC_CDN_URL}${value}`} style={{ width: '150px', height: 'auto' }} />
             ),
         },
-        // {
-        //     text: "Alarm Type",
-        //     dataField: "alarmType",
-        //     width: '60px',
-        // },
-        // {
-        //     text: "Type",
-        //     dataField: "type",
-        //     width: '60px',
-        // },
-        // {
-        //     text: "Status",
-        //     dataField: "status",
-        //     width: '60px',
-        // },
-        // {
-        //     text: "Region",
-        //     dataField: "region",
-        //     width: '60px',
-        // },
-        // {
-        //     text: "Reg Type",
-        //     dataField: "regType",
-        //     width: '60px',
-        // },
-        // {
-        //     text: "Description",
-        //     dataField: "description",
-        //     width: '200px'
-        // },
     ];
+
+    const siteOptions = sites.map((site: any) => ({ value: site.id, label: site.name }));
+    const zoneOptions = zones.map((zone: any) => ({ value: zone.id, label: zone.name }));
 
     return (
         <>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden table-to-print">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden table-to-print mt-5">
                 <Table<DashboardData>
                     columns={columns}
                     data={paginatedData || []}
@@ -186,6 +193,9 @@ const DashboardTable = (
                     onRowClick={(row: any) => handleUserClick(row)}
                     showExport
                     exportFileName="live_incident_data"
+                    filters={filters}
+                    siteOptions={siteOptions}
+                    zoneOptions={zoneOptions}
                 />
             </div>
 

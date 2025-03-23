@@ -6,35 +6,12 @@ import Button from '../common/Button';
 import { useCommon } from '@/context/CommonContext';
 import Select from '../common/Select'; // Assuming a Select component exists
 
-interface ProductSelectorProps {
+interface ProductSelectorForAiViolationProps {
     onSubmit: (submitFn: () => void) => void;
-    setFilters: (filters: any) => void;
-    setPage: (page: number) => void;
+    setFilters: any;
+    setPage: any;
+    hideSiteSelector?: boolean; // Add new prop
 }
-
-// const fetchZones = async () => {
-//     const response = await axios.get('/api/zones');
-//     return response.data.data.map((zone: any) => ({
-//         value: zone.id,
-//         label: zone.name,
-//     }));
-// };
-
-// const fetchSites = async () => {
-//     const response = await axios.get('/api/sites');
-//     return response.data.data.map((site: any) => ({
-//         value: site.id,
-//         label: site.name,
-//     }));
-// };
-
-// const fetchTypes = async () => {
-//     const response = await axios.get('/api/types');
-//     return response.data.data.map((type: any) => ({
-//         value: type.type,
-//         label: type.type,
-//     }));
-// };
 
 // Fetch activities
 const fetchActivities = async () => {
@@ -45,8 +22,13 @@ const fetchActivities = async () => {
     }));
 };
 
-const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,setPage }) => {
-    const [selectedSites, setSelectedSites] = useState<Option[]>([]);
+const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps> = ({
+    onSubmit,
+    setFilters,
+    setPage,
+    hideSiteSelector = false, // Default to showing the site selector
+}) => {
+    const [selectedSites, setSelectedSites] = useState<string>('');
     const [selectedZones, setSelectedZones] = useState<Option[]>([]);
     const [selectedActivities, setSelectedActivities] = useState<Option[]>([]);
     const [selectedTypes, setSelectedTypes] = useState<Option[]>([]);
@@ -55,7 +37,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
     const { categories, types, sites, zones, isLoading } = useCommon();
 
 
-    const siteOptions = sites.map((site:any) => ({ value: site.id, label: site.name }));
+    const siteOptions = sites.map((site:any) => ({ value: site.boardID, label: site.name }));
     const zoneOptions = zones.map((zone:any) => ({ value: zone.id, label: zone.name }));
     // const typeOptions = types.map((type:any) => ({ value: type.type, label: type.type }));
     const typeOptions = [
@@ -78,16 +60,18 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
         console.error('Failed to fetch activities:', activityError);
     }
 
-    const hasSelections = selectedSites.length > 0 || 
+    const hasSelections = !!selectedSites || 
                          selectedZones.length > 0 || 
                          selectedTypes.length > 0 || 
-                         selectedActivities.length > 0;
+                         selectedActivities.length > 0 ||
+                            !!selectedShift;
 
     const handleClearAll = () => {
-        setSelectedSites([]);
+        setSelectedSites('');
         setSelectedZones([]);
         setSelectedTypes([]);
         setSelectedActivities([]);
+        setSelectedShift(''); 
         setFilters((prev: any) => ({
             ...prev,
             sites: [],
@@ -101,7 +85,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
 
     const handleSubmit = () => {
         const filters = {
-            sites: selectedSites.map(site => site.value),
+            sites: selectedSites,
             zones: selectedZones.map(zone => zone.value),
             types: selectedTypes.map(type => type.value),
             activities: selectedActivities.map(activity => activity.value),
@@ -122,34 +106,16 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
     return (
         <div className="space-y-2">
             <div className="grid grid-cols-4 gap-2">
-                <MultiSelect
-                    options={siteOptions}
-                    value={selectedSites}
-                    onChange={setSelectedSites}
-                    placeholder="Sites"
-                    closeMenuOnSelect={false}
-                />
-                <MultiSelect
-                    options={zoneOptions}
-                    value={selectedZones}
-                    onChange={setSelectedZones}
-                    placeholder="Zones"
-                    closeMenuOnSelect={false}
-                />
-                <MultiSelect
-                    options={typeOptions}
-                    value={selectedTypes}
-                    onChange={setSelectedTypes}
-                    placeholder="Types"
-                    closeMenuOnSelect={false}
-                />
-                <MultiSelect
-                    options={activityOptions}
-                    value={selectedActivities}
-                    onChange={setSelectedActivities}
-                    placeholder="Activity"
-                    closeMenuOnSelect={false}
-                />
+                {/* Conditionally render the site selector based on hideSiteSelector prop */}
+                {!hideSiteSelector && (
+                    <Select
+                        options={siteOptions}
+                        value={selectedSites}
+                        onChange={setSelectedSites}
+                        placeholder="Sites"
+                        // closeMenuOnSelect={false}
+                    />
+                )}
                 <Select
                     options={[
                         { value: 'All', label: 'All' },
@@ -174,4 +140,4 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
     );
 };
 
-export default ProductSelector;
+export default ProductSelectorForAiViolation;

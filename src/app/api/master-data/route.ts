@@ -1,7 +1,6 @@
-
 import { db } from '@/db/drizzle';
 import { masterData, violations } from '@/db/schema';
-import { count, desc, like, or, and, isNull, eq } from 'drizzle-orm';
+import { count, desc, like, or, and, isNull, eq, gte, lte, inArray, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch all master data
@@ -20,7 +19,26 @@ export async function GET(req: Request) {
     const page = parseInt(url.searchParams.get('page') || '1', 10); // Default to page 1
     const limit = parseInt(url.searchParams.get('limit') || '10', 10); // Default to 10 items per page
     const search = url.searchParams.get('search') || ''; // Search term, default to empty if not provided
-    const boardId = url.searchParams.get('board_id'); // Add this line
+    const boardId = url.searchParams.get('board_id'); // Board ID filter
+    
+    // New filter parameters - use getAll for arrays
+    const startDate = url.searchParams.get('start_date');
+    const endDate = url.searchParams.get('end_date');
+    const zones = url.searchParams.getAll('zones[]') || url.searchParams.getAll('zones'); // Check both formats
+    const sites = url.searchParams.get('sites'); // Check both formats
+    const violationTypes = url.searchParams.getAll('violation_type[]') || url.searchParams.getAll('violation_type'); // Check both formats
+    const activities = url.searchParams.getAll('activities[]') || url.searchParams.getAll('activities'); // Check both formats
+    const shift = url.searchParams.get('shift');
+
+    console.log('Filter params:', { 
+        sites, 
+        zones, 
+        violationTypes, 
+        activities, 
+        startDate, 
+        endDate, 
+        shift 
+    });
 
     // Calculate the offset for pagination
     const offset = (page - 1) * limit;
@@ -67,7 +85,6 @@ export async function GET(req: Request) {
             .limit(limit)
             .offset(offset);
 
-
         // Build where conditions
         const whereConditions = [];
         if (search) {
@@ -81,8 +98,48 @@ export async function GET(req: Request) {
         if (boardId) {
             whereConditions.push(like(masterData.boardId, boardId));
         }
+        
+        // Add date filters
+        if (startDate) {
+            whereConditions.push(gte(masterData.time, startDate));
+        }
+        if (endDate) {
+            whereConditions.push(lte(masterData.time, endDate));
+        }
+        
+        // Add other filters - carefully handle type conversions and empty arrays
+        // if (zones && zones.length > 0) {
+        //     const zoneIds = zones.map(zone => {
+        //         const parsed = parseInt(zone);
+        //         return !isNaN(parsed) ? parsed : null;
+        //     }).filter(id => id !== null);
+            
+        //     if (zoneIds.length > 0) {
+        //         whereConditions.push(inArray(violations.zoneId, zoneIds as number[]));
+        //     }
+        // }
+        
+        if (sites) {
+            whereConditions.push(like(masterData.boardId, sites));
+        }
+        
+        // if (violationTypes && violationTypes.length > 0) {
+        //     whereConditions.push(inArray(violations.violationType, violationTypes));
+        // }
+        
+        // if (activities && activities.length > 0) {
+        //     whereConditions.push(inArray(violations.activity, activities));
+        // }
+        
+        // Add shift filter
+        if (shift === 'Day Shift') {
+            whereConditions.push(sql`CAST(${masterData.time} AS time) >= '06:00:00' AND CAST(${masterData.time} AS time) < '18:00:00'`);
+        } else if (shift === 'Night Shift') {
+            whereConditions.push(sql`CAST(${masterData.time} AS time) >= '18:00:00' OR CAST(${masterData.time} AS time) < '06:00:00'`);
+        }
 
         whereConditions.push(isNull(masterData.status));
+        
         // Apply where conditions if any exist
         if (whereConditions.length > 0) {
             baseQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));
@@ -94,7 +151,11 @@ export async function GET(req: Request) {
         // Modify count query to include the same conditions
         const countQuery = db
             .select({ count: count() })
-            .from(masterData);
+            .from(masterData)
+            .leftJoin(
+                violations,
+                eq(masterData.id, violations.masterDataId) // Same join as in the main query
+            );
 
         if (whereConditions.length > 0) {
             countQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));

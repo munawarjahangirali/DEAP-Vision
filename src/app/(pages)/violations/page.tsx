@@ -86,20 +86,6 @@ const DashboardPage: React.FC = () => {
     enabled: !!selectedData?.id,
   });
 
-  // const { data: statsData, isLoading: isStatsLoading } = useQuery({
-  //   queryKey: ['violationStats', filters],
-  //   queryFn: () => fetchViolationStats(filters),
-  // });
-
-  // const { data: chartData, isLoading: isChartLoading } = useQuery({
-  //   queryKey: ['chartData', filters],
-  //   queryFn: () => fetchChartData(filters),
-  // });
-
-  // const getCountByCategory = (categoryName: string) => {
-  //   return statsData?.find((stat:any) => stat.categoryName === categoryName)?.violationCount || 0;
-  // };
-
   const handleRowClick = (user: ReportData) => {
     setSelectedData(user);
     setIsDialogOpen(true);
@@ -218,26 +204,8 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Chart Component */}
-      {/* <div className="my-5">
-        <ChartComponent data={chartData} isLoading={isChartLoading} />
-      </div> */}
-
-      {/* Dashboard Widgets */}
-      {/* <div className="my-3">
-        <DashboardWidget
-          accidentCount={getCountByCategory('Accident')}
-          missCount={getCountByCategory('Miss')}
-          hazardousCount={getCountByCategory('Hazardous')}
-          observationCount={getCountByCategory('Observation')}
-        />
-      </div> */}
-
       {/* Violations Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden my-5">
-        {/* <div className="p-4">
-          <h2 className="text-base text-primary ">Search Results</h2>
-        </div> */}
         <Table
           columns={violationColumns}
           data={paginatedData}
