@@ -41,7 +41,7 @@ interface DashboardData {
     disableDelete?: number;
 }
 
-const fetchMasterData = async (page: number, limit: number, search: string, filters: any, boardId?: string) => {
+const fetchMasterData = async (page: number, limit: number, search: string, filters: any, sortBy?: string, sortOrder?: string, boardId?: string) => {
     const params: any = { 
         page, 
         limit, 
@@ -49,6 +49,8 @@ const fetchMasterData = async (page: number, limit: number, search: string, filt
         start_date: filters.startDate || undefined,
         end_date: filters.endDate || undefined,
         shift: filters.shift || undefined,
+        sort_by: sortBy,
+        sort_order: sortOrder
     };
     
     if (boardId) params.board_id = boardId;
@@ -86,10 +88,12 @@ interface props {
         endDate: string;
         shift: string;
     };
+    sortBy?: string;
+    sortOrder?: string;
 }
 
 const DashboardTable = (
-    { title, boardId, filters = { sites: [], zones: [], types: [], activities: [], startDate: '', endDate: '', shift: '' } }: props
+    { title, boardId, filters = { sites: [], zones: [], types: [], activities: [], startDate: '', endDate: '', shift: '' }, sortBy, sortOrder }: props
 ) => {
     const { categories, types, sites, zones, isLoading: commonLoading } = useCommon();
     const [selectedData, setSelectedData] = useState<DashboardData | null>(null);
@@ -99,8 +103,8 @@ const DashboardTable = (
     const [search, setSearch] = useState('');
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ['masterData', page, limit, search, filters, boardId],
-        queryFn: () => fetchMasterData(page, limit, search, filters, boardId)
+        queryKey: ['masterData', page, limit, search, filters, sortBy, sortOrder, boardId],
+        queryFn: () => fetchMasterData(page, limit, search, filters, sortBy, sortOrder, boardId)
     });
 
     const handleUserClick = (user: DashboardData) => {
@@ -164,6 +168,17 @@ const DashboardTable = (
             text: "Time",
             dataField: "time",
             width: '120px',
+            formatter: (cell) => {
+                if (!cell) return "";
+                return new Date(cell).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                });
+            }
         },
         {
             text: "Snapshot",

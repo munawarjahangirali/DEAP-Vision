@@ -1,6 +1,6 @@
 import { db } from '@/db/drizzle';
 import { masterData, violations } from '@/db/schema';
-import { count, desc, like, or, and, isNull, eq, gte, lte, inArray, sql } from 'drizzle-orm';
+import { count, desc, asc, like, or, and, isNull, eq, gte, lte, inArray, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 // GET: Fetch all master data
@@ -21,6 +21,10 @@ export async function GET(req: Request) {
     const search = url.searchParams.get('search') || ''; // Search term, default to empty if not provided
     const boardId = url.searchParams.get('board_id'); // Board ID filter
     
+    // Sorting parameters
+    const sortBy = url.searchParams.get('sort_by') || 'id'; // Default to id
+    const sortOrder = url.searchParams.get('sort_order') || 'desc'; // Default to descending
+    
     // New filter parameters - use getAll for arrays
     const startDate = url.searchParams.get('start_date');
     const endDate = url.searchParams.get('end_date');
@@ -37,7 +41,9 @@ export async function GET(req: Request) {
         activities, 
         startDate, 
         endDate, 
-        shift 
+        shift,
+        sortBy,
+        sortOrder
     });
 
     // Calculate the offset for pagination
@@ -81,9 +87,26 @@ export async function GET(req: Request) {
                 violations,
                 eq(masterData.id, violations.masterDataId) // Join condition
             )
-            .orderBy(desc(masterData.id))
             .limit(limit)
             .offset(offset);
+
+        // Apply sorting based on parameters
+        if (sortBy === 'time') {
+            if (sortOrder === 'asc') {
+                baseQuery.orderBy(asc(masterData.time));
+            } else {
+                baseQuery.orderBy(desc(masterData.time));
+            }
+        } else if (sortBy === 'summary') {
+            if (sortOrder === 'asc') {
+                baseQuery.orderBy(asc(masterData.summary));
+            } else {
+                baseQuery.orderBy(desc(masterData.summary));
+            }
+        } else {
+            // Default sorting by id
+            baseQuery.orderBy(desc(masterData.id));
+        }
 
         // Build where conditions
         const whereConditions = [];

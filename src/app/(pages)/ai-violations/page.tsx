@@ -15,6 +15,8 @@ const DashboardPage = () => {
         endDate: '',
         shift: '',
     });
+    const [sortBy, setSortBy] = useState('id');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [page, setPage] = useState(1);
     const [formSubmit, setFormSubmit] = useState<(() => void) | null>(null);
 
@@ -43,6 +45,10 @@ const DashboardPage = () => {
                                 onSubmit={handleFilterSubmit}
                                 setFilters={setFilters}
                                 setPage={setPage}
+                                setSortBy={setSortBy}
+                                setSortOrder={setSortOrder}
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
                             />
                         </div>
                     </div>
@@ -54,7 +60,12 @@ const DashboardPage = () => {
                         </div>
                     </div>
                 </div>
-                <DashboardTable filters={filters} />
+
+                <DashboardTable 
+                    filters={filters} 
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                />
             </div>
         </>
     );

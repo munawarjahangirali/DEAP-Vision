@@ -10,7 +10,11 @@ interface ProductSelectorForAiViolationProps {
     onSubmit: (submitFn: () => void) => void;
     setFilters: any;
     setPage: any;
-    hideSiteSelector?: boolean; // Add new prop
+    hideSiteSelector?: boolean;
+    setSortBy?: (value: string) => void;
+    setSortOrder?: (value: string) => void;
+    sortBy?: string;
+    sortOrder?: string;
 }
 
 // Fetch activities
@@ -26,16 +30,19 @@ const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps
     onSubmit,
     setFilters,
     setPage,
-    hideSiteSelector = false, // Default to showing the site selector
+    hideSiteSelector = false,
+    setSortBy,
+    setSortOrder,
+    sortBy = '',
+    sortOrder = ''
 }) => {
     const [selectedSites, setSelectedSites] = useState<string>('');
     const [selectedZones, setSelectedZones] = useState<Option[]>([]);
     const [selectedActivities, setSelectedActivities] = useState<Option[]>([]);
     const [selectedTypes, setSelectedTypes] = useState<Option[]>([]);
-    const [selectedShift, setSelectedShift] = useState<string>(''); // Default to empty string
+    const [selectedShift, setSelectedShift] = useState<string>(''); 
 
     const { categories, types, sites, zones, isLoading } = useCommon();
-
 
     const siteOptions = sites.map((site:any) => ({ value: site.boardID, label: site.name }));
     const zoneOptions = zones.map((zone:any) => ({ value: zone.id, label: zone.name }));
@@ -55,7 +62,6 @@ const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps
 
     const { data: activityOptions = [], error: activityError } = useQuery({ queryKey: ['activities'], queryFn: fetchActivities });
 
-
     if (activityError) {
         console.error('Failed to fetch activities:', activityError);
     }
@@ -64,7 +70,9 @@ const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps
                          selectedZones.length > 0 || 
                          selectedTypes.length > 0 || 
                          selectedActivities.length > 0 ||
-                            !!selectedShift;
+                            !!selectedShift ||
+                            sortBy !== 'id' ||
+                            sortOrder !== 'desc';
 
     const handleClearAll = () => {
         setSelectedSites('');
@@ -72,6 +80,8 @@ const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps
         setSelectedTypes([]);
         setSelectedActivities([]);
         setSelectedShift(''); 
+        if (setSortBy) setSortBy('id');
+        if (setSortOrder) setSortOrder('desc');
         setFilters((prev: any) => ({
             ...prev,
             sites: [],
@@ -103,37 +113,68 @@ const ProductSelectorForAiViolation: React.FC<ProductSelectorForAiViolationProps
         onSubmit(handleSubmit);
     }, [selectedSites, selectedZones, selectedTypes, selectedActivities, selectedShift]); // Add selectedShift as a dependency
 
+    const sortOptions = [
+        { value: 'id_desc', label: 'Default' },
+        { value: 'time_asc', label: 'Date (Oldest First)' },
+        { value: 'time_desc', label: 'Date (Newest First)' },
+        { value: 'summary_asc', label: 'Violation Type (A-Z)' },
+        { value: 'summary_desc', label: 'Violation Type (Z-A)' },
+    ];
+
+    const handleSortChange = (value: string) => {
+        if (setSortBy && setSortOrder) {
+            const [field, order] = value.split('_');
+            setSortBy(field);
+            setSortOrder(order);
+        }
+    };
+
     return (
         <div className="space-y-2">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-12 gap-2">
                 {/* Conditionally render the site selector based on hideSiteSelector prop */}
                 {!hideSiteSelector && (
-                    <Select
-                        options={siteOptions}
-                        value={selectedSites}
-                        onChange={setSelectedSites}
-                        placeholder="Sites"
-                        // closeMenuOnSelect={false}
-                    />
+                    <div className="col-span-3">
+                        <Select
+                            options={siteOptions}
+                            value={selectedSites}
+                            onChange={setSelectedSites}
+                            placeholder="Sites"
+                        />
+                    </div>
                 )}
-                <Select
-                    options={[
-                        { value: 'All', label: 'All' },
-                        { value: 'Day Shift', label: 'Day Shift' },
-                        { value: 'Night Shift', label: 'Night Shift' },
-                    ]}
-                    value={selectedShift}
-                    onChange={(value) => setSelectedShift(value)} // Update selectedShift state
-                    placeholder="Select Shift"
-                />
+                <div className="col-span-3">
+                    <Select
+                        options={[
+                            { value: 'All', label: 'All' },
+                            { value: 'Day Shift', label: 'Day Shift' },
+                            { value: 'Night Shift', label: 'Night Shift' },
+                        ]}
+                        value={selectedShift}
+                        onChange={(value) => setSelectedShift(value)}
+                        placeholder="Select Shift"
+                    />
+                </div>
+                {/* {setSortBy && setSortOrder && ( */}
+                    <div className="col-span-3">
+                        <Select
+                            options={sortOptions}
+                            value={`${sortBy}_${sortOrder}`}
+                            onChange={handleSortChange}
+                            placeholder="Sort by"
+                        />
+                    </div>
+                {/* )} */}
                 {hasSelections && (
-                    <Button
-                        variant='delete'
-                        className="px-3 py-2 text-xs font-medium rounded-lg w-20"
-                        onClick={handleClearAll}
-                    >
-                        Clear
-                    </Button>
+                    <div className="col-span-3">
+                        <Button
+                            variant='delete'
+                            className="px-3 py-2 text-xs font-medium rounded-lg w-20"
+                            onClick={handleClearAll}
+                        >
+                            Clear
+                        </Button>
+                    </div>
                 )}
             </div>
         </div>

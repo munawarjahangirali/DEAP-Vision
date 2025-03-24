@@ -139,7 +139,19 @@ const DashboardPage: React.FC = () => {
       dataField: "activity",
       formatter: (value) => value || 'Drilling'
     },
-    { text: "Time", dataField: "time" },
+    {
+      text: "Time", dataField: "time", formatter: (cell) => {
+        if (!cell) return "";
+        return new Date(cell).toLocaleString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        });
+      }
+    },
     {
       text: "Snapshot",
       dataField: "imageFile",

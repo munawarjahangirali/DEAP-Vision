@@ -21,6 +21,8 @@ export default function SiteAutomaticAlarm({ params }: { params: any }) {
         shift: '',
     });
     const [page, setPage] = useState(1);
+    const [sortBy, setSortBy] = useState('id');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [formSubmit, setFormSubmit] = useState<(() => void) | null>(null);
 
     const handleFilterSubmit = (submitFn: () => void) => {
@@ -53,7 +55,11 @@ export default function SiteAutomaticAlarm({ params }: { params: any }) {
                                         onSubmit={handleFilterSubmit}
                                         setFilters={setFilters}
                                         setPage={setPage}
-                                        hideSiteSelector={true} // Hide site selector since we're already on a site page
+                                        hideSiteSelector={true}
+                                        setSortBy={setSortBy}
+                                        setSortOrder={setSortOrder}
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
                                     />
                                 </div>
                             </div>
@@ -82,6 +88,8 @@ export default function SiteAutomaticAlarm({ params }: { params: any }) {
                         title="Alarm"
                         boardId={boardId}
                         filters={filters}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
                     />
                 ) : (
                     <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded relative">
