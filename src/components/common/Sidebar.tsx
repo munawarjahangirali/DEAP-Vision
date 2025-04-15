@@ -154,9 +154,9 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                             </div>
                           </Link>
                           {site?.liveView && site.liveView.trim() !== '' && (
-                            <Link href={`/sites/${site.id}/live-view`} onClick={onClose}>
+                            <Link href={`${site.liveView}`} onClick={onClose} target="_blank" rel="noopener noreferrer">
                               <div
-                                className={`p-2 rounded-lg text-sm transition-colors duration-200 flex items-center space-x-2 ${isSitePageActive(site.id, 'live-view')
+                                className={`p-2 rounded-lg text-sm transition-colors duration-200 flex items-center space-x-2 ${isSitePageActive(site.id, 'automatic-alarm')
                                   ? 'bg-teal-100 text-teal-800'
                                   : 'hover:bg-teal-800'
                                   }`}
