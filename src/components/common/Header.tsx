@@ -29,11 +29,13 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const siteId = pathName?.split('/')[2];
+    const site = sites?.find(site => site.id.toString() === siteId);
+
     const getPageTitle = () => {
         switch (true) {
             case /^\/sites\/[^/]+\/overview/.test(pathName || ''):
-                const siteId = pathName?.split('/')[2];
-                const site = sites?.find(site => site.id.toString() === siteId);
+                
                 const getRpmDot = (rpm: number | null | undefined, boardID: number | null | undefined) => {
                     if (boardID) {
                         if (rpm === null || rpm === undefined) return '';
@@ -66,6 +68,9 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
         }
     };
 
+    const getStandPipePressure = (site as any)?.stand_pipe_pressure;
+    const getRpm = (site as any)?.rpm;
+
     const handleLogout = () => {
         try {
             if (setIsAuthenticated) {
@@ -94,7 +99,23 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
                         >
                             <Menu className="w-6 h-6" />
                         </button>
-                        <h2 className="text-lg font-semibold text-primary">{getPageTitle()}</h2>
+                        <div className='flex flex-col gap-1'>
+                            <h2 className="text-lg font-semibold text-primary">{getPageTitle()}</h2>
+                            <div className='flex flex-col'>
+                                {getStandPipePressure !== undefined && (
+                                    <div className='flex items-center gap-2'>
+                                        <span className='text-xs text-gray-500 font-medium'>Stand Pipe Pressure:</span>
+                                        <span className='text-sm text-primary font-semibold'>{getStandPipePressure}</span>
+                                    </div>
+                                )}
+                                {getRpm !== undefined && (
+                                    <div className='flex items-center gap-2'>
+                                        <span className='text-xs text-gray-500 font-medium'>RPM:</span>
+                                        <span className='text-sm text-primary font-semibold'>{getRpm}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                     <div className="hidden md:flex items-center ">
                         <div className="relative w-[20rem] h-16 -mt-5">
