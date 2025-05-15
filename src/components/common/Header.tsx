@@ -30,14 +30,21 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
     }, []);
 
     const getPageTitle = () => {
-        switch (true) {  
+        switch (true) {
             case /^\/sites\/[^/]+\/overview/.test(pathName || ''):
-                const siteId = pathName?.split('/')[2];  
-                const site = sites?.find(site => site.id.toString() === siteId);  
-                return site ? `OVERVIEW - ${site.name.toUpperCase().replace(/-/g, ' ')}` : 'OVERVIEW';
+                const siteId = pathName?.split('/')[2];
+                const site = sites?.find(site => site.id.toString() === siteId);
+                const getRpmDot = (rpm: number | null | undefined, boardID: number | null | undefined) => {
+                    if (boardID) {
+                        if (rpm === null || rpm === undefined) return '';
+                        if (rpm === 0) return '🟢'; else return '🔴';
+                    }
+                    return '';
+                };
+                return site ? `OVERVIEW - ${site.name.toUpperCase().replace(/-/g, ' ')} ${getRpmDot((site as any).rpm, (site as any).boardID)}` : 'OVERVIEW';
             case /^\/sites\/[^/]+\/live-view/.test(pathName || ''):
-                const liveSiteId = pathName?.split('/')[2];  
-                const liveSite = sites?.find(site => site.id.toString() === liveSiteId);  
+                const liveSiteId = pathName?.split('/')[2];
+                const liveSite = sites?.find(site => site.id.toString() === liveSiteId);
                 return liveSite ? `LIVE VIEW - ${liveSite.name.toUpperCase().replace(/-/g, ' ')}` : 'LIVE VIEW';
                 
             case '/ai-violations' === pathName:

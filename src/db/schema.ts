@@ -82,6 +82,7 @@ export const sites = pgTable("sites", {
   name: varchar("name").notNull(),
   longitude: varchar("longitude"),
   latitude: varchar("latitude"),
+  rpm:  doublePrecision("rpm"),
   boardID: varchar("board_id"),
   liveView: varchar("live_view"),
   enabled: boolean("enabled"),
