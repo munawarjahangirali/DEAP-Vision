@@ -39,7 +39,8 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
                 const getRpmDot = (rpm: number | null | undefined, boardID: number | null | undefined) => {
                     if (boardID) {
                         if (rpm === null || rpm === undefined) return '';
-                        if (rpm === 0) return '🟢'; else return '🔴';
+                        if (rpm === 0) return '🟢'; 
+                        else return '🔴'; 
                     }
                     return '';
                 };
@@ -48,11 +49,11 @@ const Header: React.FC<HeaderProps> = ({ onSidebarOpen }) => {
                 const liveSiteId = pathName?.split('/')[2];
                 const liveSite = sites?.find(site => site.id.toString() === liveSiteId);
                 return liveSite ? `LIVE VIEW - ${liveSite.name.toUpperCase().replace(/-/g, ' ')}` : 'LIVE VIEW';
-                
+
+            case '/ai-events' === pathName:
+                return 'AI EVENTS';
             case '/ai-violations' === pathName:
                 return 'AI VIOLATIONS';
-            case '/violations' === pathName:
-                return 'MANUAL VIOLATIONS';
             case '/settings' === pathName:
                 return 'SETTINGS';
             case '/settings/create' === pathName:

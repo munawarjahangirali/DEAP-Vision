@@ -330,7 +330,11 @@ export async function PUT(req: Request) {
         if (severity !== undefined) updateData.severity = severity;
         if (activity !== undefined) updateData.activity = activity;
         if (categoryId !== undefined) updateData.categoryId = categoryId;
-        if (violationStatus !== undefined) updateData.violationStatus = violationStatus;
+        if (violationStatus !== undefined) {
+            updateData.violationStatus = violationStatus;
+            // When violation status is updated, also update the reviewedAt timestamp
+            updateData.reviewedAt = new Date();
+        }
 
         // Update the violation record
         await db
@@ -356,6 +360,86 @@ export async function PUT(req: Request) {
         });
     } catch (error) {
         console.error('Error updating violation:', error);
+        return NextResponse.json({
+            status: 500,
+            message: 'Internal Server Error',
+        });
+    }
+}
+
+// PATCH: Update violation reviewedAt timestamp
+export async function PATCH(req: Request) {    const url = new URL(req.url);
+    const violationId = url.searchParams.get('id');
+    const body = await req.json();
+    const { reviewedAt } = body;
+
+    // Verify the token and get user ID
+    const auth = await verifyTokenMiddleware(req);
+    if (auth instanceof Response) {
+        return auth;
+    }
+
+    const userId = auth?.userId;
+    if (typeof userId !== 'number') {
+        return NextResponse.json({ message: 'Invalid user ID.' }, { status: 400 });
+    }
+
+    if (!violationId) {
+        return NextResponse.json({
+            status: 400,
+            message: 'Violation ID is required.',
+        });
+    }
+
+    if (!reviewedAt) {
+        return NextResponse.json({
+            status: 400,
+            message: 'reviewedAt date is required.',
+        });
+    }
+
+    try {
+        // Fetch the current violation data before updating
+        const existingViolation = await db
+            .select()
+            .from(violations)
+            .where(eq(violations.id, parseInt(violationId)))
+            .limit(1)
+            .then(res => res[0]);
+
+        if (!existingViolation) {
+            return NextResponse.json({
+                status: 404,
+                message: 'Violation not found.',
+            });
+        }        // Update the violation record with provided timestamp
+        const updateData = {
+            reviewedAt: new Date(reviewedAt)
+        };
+
+        await db
+            .update(violations)
+            .set(updateData)
+            .where(eq(violations.id, parseInt(violationId)));
+
+        // Create a history entry for the violation update
+        const historyData = JSON.stringify(existingViolation);
+
+        // Insert into history table
+        await db.insert(histories).values({
+            type: 'violation',
+            typeId: parseInt(violationId),
+            data: historyData,
+            createdBy: userId,
+            updatedBy: userId
+        });
+
+        return NextResponse.json({
+            status: 200,
+            message: 'Violation review timestamp updated successfully.',
+        });
+    } catch (error) {
+        console.error('Error updating violation review timestamp:', error);
         return NextResponse.json({
             status: 500,
             message: 'Internal Server Error',

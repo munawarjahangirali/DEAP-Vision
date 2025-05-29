@@ -203,6 +203,7 @@ export const violations = pgTable("violations", {
   violationType: varchar("violation_type"),
   activity: varchar("activity"),
   severity: severityEnum("severity"),
+  reviewedAt: timestamp("reviewed_at"),
 });
 
 export const histories = pgTable('histories', {
