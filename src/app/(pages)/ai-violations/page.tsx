@@ -184,7 +184,7 @@ const DashboardPage: React.FC = () => {
         <MediaRenderer 
           imageFile={row.imageFile}
           videoFile={row.videoFile}
-          style={{ width: '150px', height: 'auto' }}
+          style={{ width: '120px', height: 'auto', borderRadius: '8px', overflow: 'hidden' }}
           cdnUrl={NEXT_PUBLIC_CDN_URL}
         />
       ),
