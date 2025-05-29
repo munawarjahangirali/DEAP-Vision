@@ -29,6 +29,7 @@ interface ReportData {
     disableDelete?: number;
     assignedTo?: string;
     comment?: string;
+    reviewedAt?: string;
 }
 
 interface ViolationDetailsFormProps {
@@ -38,6 +39,7 @@ interface ViolationDetailsFormProps {
 
 const ViolationDetailsForm: React.FC<ViolationDetailsFormProps> = ({ data, setIsDialogOpen }) => {
     const { categories, sites, zones } = useCommon();
+    console.log("🚀 ~ categories:", categories)
 
     const [loading, setLoading] = useState(false);
     const queryClient = useQueryClient();
@@ -71,6 +73,7 @@ const ViolationDetailsForm: React.FC<ViolationDetailsFormProps> = ({ data, setIs
         "Pents (PPE)",
         "Dropped Object",
         "Injury/illness",
+        "Line of Fire Intrusion"
     ].map(type => ({ value: type, label: type }));
 
     const siteOptions = sites.map((site: any) => ({ value: site.id, label: site.name }));
@@ -128,7 +131,15 @@ const ViolationDetailsForm: React.FC<ViolationDetailsFormProps> = ({ data, setIs
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     {/* <InfoRow label="TYPE" value={data?.type} /> */}
-                    <InfoRow label="Manual Violation ID" value={data?.id?.toString()} />
+                    <InfoRow label="Reviewed At" value={
+                        data?.reviewedAt ? new Date(data.reviewedAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        }) : "Not Reviewed"} />
                     <InfoRow label="AI Violation ID" value={data?.masterDataId?.toString()} />
                     <InfoRow
                         label="AI Violation Type"

@@ -55,8 +55,8 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   const navigationItems = [
     { name: 'Dashboard', icon: Layout, path: '/dashboard' },
-    { name: 'AI Violations', icon: Antenna, path: '/ai-violations' },
-    { name: 'Manual Violations', icon: ClipboardMinus, path: '/violations' },
+    { name: 'AI Events', icon: Antenna, path: '/ai-events' },
+    { name: 'AI Violations', icon: ClipboardMinus, path: '/ai-violations' },
     { name: 'Chatbot', icon: MessagesSquare, path: '/chat-bot' },
    // { name: 'Analytics', icon: ChartBarStacked, path: '/analytics' },
     { name: 'Settings', icon: Settings, path: '/settings' },
