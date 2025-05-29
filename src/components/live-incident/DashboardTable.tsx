@@ -8,6 +8,7 @@ import MasterDetailsForm from './MasterDetailsForm';
 import { useCommon } from '@/context/CommonContext';
 import SearchInput from '@/components/common/Search';
 import ImageRenderer from '../common/ImageRenderer';
+import MediaRenderer from '../common/MediaRenderer';
 
 interface DashboardData {
     id: number;
@@ -184,8 +185,13 @@ const DashboardTable = (
             text: "Snapshot",
             dataField: "image",
             width: '150px',
-            formatter: (value) => (
-                <ImageRenderer src={`${NEXT_PUBLIC_CDN_URL}${value}`} style={{ width: '150px', height: 'auto' }} />
+            formatter: (value,row) => (
+                <MediaRenderer 
+                    imageFile={row.image}
+                    videoFile={row.videoFile}
+                    style={{ width: '120px', height: 'auto', borderRadius: '8px', overflow: 'hidden' }}
+                    cdnUrl={NEXT_PUBLIC_CDN_URL}
+                />
             ),
         },
     ];

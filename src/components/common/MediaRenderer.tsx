@@ -17,7 +17,7 @@ const MediaRenderer: React.FC<MediaRendererProps> = ({ imageFile, videoFile, sty
         return (
             <div style={{ ...style, position: 'relative' }}>
                 <ReactPlayer
-                    url={`${videoFile}`}
+                    url={`${cdnUrl}${videoFile}`}
                     width="100%"
                     height="100%"
                     controls={false}
