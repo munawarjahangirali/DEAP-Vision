@@ -69,6 +69,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({ onSubmit,setFilters,s
         "Pents (PPE)",
         "Dropped Object",
         "Injury/illness",
+        "Line of Fire Intrusion",
     ].map(type => ({ value: type, label: type }));
 
     const { data: activityOptions = [], error: activityError } = useQuery({ queryKey: ['activities'], queryFn: fetchActivities });

@@ -101,6 +101,7 @@ const MasterDetailsForm: React.FC<MasterDetailsFormProps> = ({ master, categorie
         "Pents (PPE)",
         "Dropped Object",
         "Injury/illness",
+        "Line of Fire Intrusion",
     ].map(type => ({ value: type, label: type }));
 
     const siteOptions = sites.map(site => ({
